@@ -7,46 +7,43 @@
 
 
 Rotor* CopyRotor(Rotor* original) {
-	Rotor* copy = new Rotor(original->GetAmountOfLettersInABC());
+	int letters_in_abc = original->GetAmountOfLettersInABC();
+	Rotor* copy = new Rotor(letters_in_abc);
 	int *original_triggers=original->GetTriggerLettersArray();
-	int amount_of_triggers=0;
+	int amount_of_triggers= original->GetAmountOfTriggerLetters();
 
-	while (original_triggers[amount_of_triggers] != 0) {
-		amount_of_triggers++;
-	}
+	int* triggers_copy = (int*)malloc((amount_of_triggers+1) * sizeof(int));
 
-	int* triggers_copy = (int*)malloc(amount_of_triggers+1 * sizeof(int));
-
-	for (int i = 0; i < amount_of_triggers+1; i++) {
+	for (int i = 0; i < (amount_of_triggers+1); i++) {
 		triggers_copy[i] = original_triggers[i];
 	}
 	copy->PasteTriggerLetters(triggers_copy);
 
-	int letters_in_abc = original->GetAmountOfLettersInABC();
-	substiution_str* permutation_copy = (substiution_str*)malloc(letters_in_abc * sizeof(substiution_str));
-	substiution_str* original_permutation = original->GetPermutation();
+	
+	permutation_struct* relative_permutation_copy = (permutation_struct*)malloc(letters_in_abc * sizeof(permutation_struct));
+	permutation_struct* original_relative_permutation = original->GetPermutation();
 
 	for (int i = 0; i < letters_in_abc; i++) {
-		permutation_copy[i] = original_permutation[i];
+		relative_permutation_copy[i] = original_relative_permutation[i];
 	}
 
-	copy->PastePermutation(permutation_copy);
+	copy->PastePermutation(relative_permutation_copy);
 
 	return copy;
 }
 
 
 Reflector* CopyReflector(Reflector* original) {
-	Reflector* copy = new Reflector(original->GetAmountOfLettersInABC());
 	int letters_in_abc = original->GetAmountOfLettersInABC();
-	substiution_str* permutation_copy = (substiution_str*)malloc(letters_in_abc * sizeof(substiution_str));
-	substiution_str* original_permutation = original->GetPermutation();
+	Reflector* copy = new Reflector(letters_in_abc);
+	permutation_struct* relative_permutation_copy = (permutation_struct*)malloc(letters_in_abc * sizeof(permutation_struct));
+	permutation_struct* original_relative_permutation = original->GetPermutation();
 
 	for (int i = 0; i < letters_in_abc; i++) {
-		permutation_copy[i] = original_permutation[i];
+		relative_permutation_copy[i] = original_relative_permutation[i];
 	}
 
-	copy->PastePermutation(permutation_copy);
+	copy->PastePermutation(relative_permutation_copy);
 
 	return copy;
 }
@@ -102,19 +99,19 @@ int main() {
 		}
 
 		scanf("%d ", &index_of_gear_in_main_array);
-		mechanism_array[number_of_rotors] = CopyReflector(reflectors_array[index_of_gear_in_main_array]);;
+		mechanism_array[number_of_rotors] = CopyReflector(reflectors_array[index_of_gear_in_main_array]);
 
-		Enigma* enigma_machine = new Enigma(mechanism_array, rotors_in_mechanism, number_of_rotors);
+		Enigma enigma_machine (mechanism_array, rotors_in_mechanism, number_of_rotors);
 		int letter;
 		int count = 1;
 		while (std::cin>>letter && letter != 0) {
-			enigma_machine->Lever();
-			printf("%d ", enigma_machine->Encrypt(letter-1)+1);
+			enigma_machine.Lever();
+			printf("%d ", enigma_machine.Encrypt(letter-1)+1);
 			count++;
 		}
 
 		for (int i = 0; i < number_of_rotors; i++) {
-			//delete rotors_in_mechanism[i];
+			delete rotors_in_mechanism[i];
 			rotors_in_mechanism[i] = nullptr;
 		}
 		delete[] rotors_in_mechanism;
@@ -137,5 +134,6 @@ int main() {
 	}
 	delete[] reflectors_array;
 	reflectors_array = nullptr;
+
 	return 0;
 }

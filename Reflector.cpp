@@ -4,7 +4,8 @@
 Reflector::Reflector(int amount_of_letters_in_abc)
 {
 	this->amount_of_letters_in_abc = amount_of_letters_in_abc;
-	this->permutation = (substiution_str*)malloc(amount_of_letters_in_abc * sizeof(substiution_str));
+	this->permutation = (int*)malloc(amount_of_letters_in_abc * sizeof(int));
+	this->relative_permutation = (permutation_struct*)malloc(amount_of_letters_in_abc * sizeof(permutation_struct));
 }
 
 
