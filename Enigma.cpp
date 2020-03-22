@@ -23,33 +23,54 @@ int Enigma::Encrypt(int letter) {
 
 
 void Enigma::Lever() {
-	for (int i = 0; i < this->number_of_rotors; i++) {
+	int rotatable_rotors = this->number_of_rotors;
+	if (rotatable_rotors > 3) {
+		rotatable_rotors = 3;
+	}
+	for (int i = 0; i < rotatable_rotors; i++) {
 		if (this->rotors_in_mechanism[i]->GetLeverPosition() == BEFORE_LOADED) {
 			this->rotors_in_mechanism[i]->SetLeverPosition(LOADED);
 		}
 	}
-	rotors_in_mechanism[0]->SetLeverPosition(LOADED);
-	int i = this->number_of_rotors;
-	if (i > 3) {
-		i = 3;
+	if (this->number_of_rotors > 1) {
+		for (int i = 0; i < rotatable_rotors; i++) {
+			int* trigger_letters = this->rotors_in_mechanism[i]->GetTriggerLettersArray();
+			int j = 0;
+			while (trigger_letters[j] != 0) {
+				int checked_letter;
+				checked_letter = trigger_letters[j];
+				checked_letter -= 2;
+				if (checked_letter == 0) {
+					checked_letter = rotors_in_mechanism[i]->GetAmountOfLettersInABC();
+				}
+				if (checked_letter == rotors_in_mechanism[i]->GetCurrentAlphabetLetter() && (i + 1) != this->number_of_rotors) {
+					rotors_in_mechanism[i + 1]->SetLeverPosition(OK_Before_Loaded);
+				}
+				j++;
+			}
+		}
 	}
+	rotors_in_mechanism[0]->SetLeverPosition(LOADED);
 	int rotation = NO_ACTION;
 	while (rotation == NO_ACTION) {
-		rotation = this->rotors_in_mechanism[--i]->LeverPush();
-		if (rotation == PUSHED && i != 0) {
-			for (int j = i - 1; j >= 0; j--) {
+		if (rotatable_rotors == 1 || this->rotors_in_mechanism[rotatable_rotors - 2]->moved == true) {
+			rotation = this->rotors_in_mechanism[rotatable_rotors-1]->LeverPush();
+		}
+		if (rotation == PUSHED && rotatable_rotors - 1 != 0) {
+			for (int j = rotatable_rotors - 2; j >= 0; j--) {
 				this->rotors_in_mechanism[j]->SetLeverPosition(LOADED);
 				this->rotors_in_mechanism[j]->LeverPush();
 			}
 		}
+		--rotatable_rotors;
 	}
 	if (this->number_of_rotors>1) {
 		int* trigger_letters;
-		int j = this->number_of_rotors;
-		if (j > 3) {
-			j = 3;
+		int rotors_that_can_trigger = this->number_of_rotors;
+		if (rotors_that_can_trigger > 3) {
+			rotors_that_can_trigger = 3;
 		}
-		for (i = 0; i < j; i++) {
+		for (int i = 0; i < rotors_that_can_trigger; i++) {
 			trigger_letters = this->rotors_in_mechanism[i]->GetTriggerLettersArray();
 				int j = 0;
 				while (trigger_letters[j] != 0) {
@@ -60,8 +81,10 @@ void Enigma::Lever() {
 					if (checked_letter == 0) {
 						checked_letter = rotors_in_mechanism[i]->GetAmountOfLettersInABC();
 					}
-					if (checked_letter == rotors_in_mechanism[i]->GetAlphabetOriginal(0) && (i + 1) != this->number_of_rotors) {
-						rotors_in_mechanism[i + 1]->SetLeverPosition(BEFORE_LOADED);
+					if (checked_letter == rotors_in_mechanism[i]->GetCurrentAlphabetLetter() && (i + 1) != this->number_of_rotors) {
+						if (rotors_in_mechanism[i + 1]->GetLeverPosition() == OK_Before_Loaded) {
+							rotors_in_mechanism[i + 1]->SetLeverPosition(BEFORE_LOADED); 
+						}
 					}
 					j++;
 				}
